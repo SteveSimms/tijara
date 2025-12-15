@@ -225,11 +225,11 @@ defmodule TijaraWeb.JournalLive do
               <div class="grid grid-cols-2 gap-6">
                 <div class="space-y-2">
                   <label class="text-xs text-white/50 uppercase tracking-wider font-medium ml-1">
-                    Pair
+                    Symbol / Pair
                   </label>
                   <.input
                     field={@form[:pair]}
-                    placeholder="e.g. EUR/USD"
+                    placeholder="e.g. AAPL or EUR/USD"
                     class="w-full bg-base-200/50 border border-white/10 focus:border-primary/50 text-white rounded-lg px-4 py-3 text-sm placeholder:text-white/20 transition-all focus:ring-1 focus:ring-primary/50 focus:outline-none"
                   />
                 </div>
