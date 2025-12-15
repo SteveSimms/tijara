@@ -43,6 +43,7 @@ defmodule TijaraWeb.Router do
 
     # get "/", PageController, :home
     live "/", HomeLive, :home
+    live "/journal", JournalLive, :index
     auth_routes AuthController, Tijara.Accounts.User, path: "/auth"
     sign_out_route AuthController
 
