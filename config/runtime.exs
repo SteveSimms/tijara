@@ -23,6 +23,11 @@ end
 config :tijara, TijaraWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
+# Add this to load for all environments, or specific ones as needed.
+# Since we are using it in dev locally for now, we can put it outside the prod block,
+# or just ensure dev.exs picks it up if we want. But runtime.exs runs for all.
+config :tijara, :finnhub_api_key, System.get_env("FINNHUB_API_KEY")
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

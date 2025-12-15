@@ -60,7 +60,7 @@ config :spark,
 config :tijara,
   ecto_repos: [Tijara.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [Tijara.Ledger, Tijara.Accounts],
+  ash_domains: [Tijara.Ledger, Tijara.Accounts, Tijara.Journal],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
 # Configure the endpoint
