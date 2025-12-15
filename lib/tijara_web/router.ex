@@ -41,7 +41,8 @@ defmodule TijaraWeb.Router do
   scope "/", TijaraWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    # get "/", PageController, :home
+    live "/", HomeLive, :home
     auth_routes AuthController, Tijara.Accounts.User, path: "/auth"
     sign_out_route AuthController
 
