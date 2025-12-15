@@ -193,70 +193,124 @@ defmodule TijaraWeb.JournalLive do
       </div>
       
     <!-- Simple Modal for New Entry -->
+    <!-- Simple Modal for New Entry -->
       <%= if @show_modal do %>
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div class="bg-base-200 border border-white/10 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <!-- Backdrop -->
+          <div
+            class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+            phx-click="toggle_modal"
+          >
+          </div>
+          
+    <!-- Modal Content -->
+          <div class="relative bg-base-100 border border-white/10 rounded-2xl w-full max-w-lg p-8 shadow-2xl overflow-hidden group">
+            
+    <!-- Glow Effect -->
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-3xl opacity-50 pointer-events-none">
+            </div>
+
             <button
               phx-click="toggle_modal"
-              class="absolute top-4 right-4 text-white/30 hover:text-white"
+              class="absolute top-6 right-6 text-white/30 hover:text-white transition-colors"
             >
               <.icon name="hero-x-mark" class="w-6 h-6" />
             </button>
 
-            <h3 class="text-xl font-light uppercase tracking-widest text-white/90 mb-6">
-              Log New Trade
+            <h3 class="text-xl font-light uppercase tracking-widest text-white/90 mb-8 flex items-center gap-3">
+              <span class="w-1 h-6 bg-primary rounded-full"></span> Log New Trade
             </h3>
 
-            <.form for={@form} phx-submit="save" class="space-y-4">
-              <div class="grid grid-cols-2 gap-4">
+            <.form for={@form} phx-submit="save" class="space-y-6">
+              <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-xs text-white/50 uppercase tracking-wider font-medium ml-1">
+                    Pair
+                  </label>
+                  <.input
+                    field={@form[:pair]}
+                    placeholder="e.g. EUR/USD"
+                    class="w-full bg-base-200/50 border border-white/10 focus:border-primary/50 text-white rounded-lg px-4 py-3 text-sm placeholder:text-white/20 transition-all focus:ring-1 focus:ring-primary/50 focus:outline-none"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-xs text-white/50 uppercase tracking-wider font-medium ml-1">
+                    Type
+                  </label>
+                  <.input
+                    field={@form[:type]}
+                    type="select"
+                    options={[:long, :short]}
+                    prompt="Select Direction"
+                    class="w-full bg-base-200/50 border border-white/10 focus:border-primary/50 text-white rounded-lg px-4 py-3 text-sm transition-all focus:ring-1 focus:ring-primary/50 focus:outline-none appearance-none"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-xs text-white/50 uppercase tracking-wider font-medium ml-1">
+                    Entry Price
+                  </label>
+                  <.input
+                    field={@form[:entry_price]}
+                    type="number"
+                    step="any"
+                    placeholder="0.00"
+                    class="w-full bg-base-200/50 border border-white/10 focus:border-primary/50 text-white rounded-lg px-4 py-3 text-sm placeholder:text-white/20 transition-all focus:ring-1 focus:ring-primary/50 focus:outline-none"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-xs text-white/50 uppercase tracking-wider font-medium ml-1">
+                    Size (Lots)
+                  </label>
+                  <.input
+                    field={@form[:size]}
+                    type="number"
+                    step="any"
+                    placeholder="1.0"
+                    class="w-full bg-base-200/50 border border-white/10 focus:border-primary/50 text-white rounded-lg px-4 py-3 text-sm placeholder:text-white/20 transition-all focus:ring-1 focus:ring-primary/50 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-xs text-white/50 uppercase tracking-wider font-medium ml-1">
+                  Strategy Tag
+                </label>
                 <.input
-                  field={@form[:pair]}
-                  placeholder="Pair (e.g. EUR/USD)"
-                  class="bg-base-300 border-white/5 focus:border-primary/50 text-white"
-                />
-                <.input
-                  field={@form[:type]}
-                  type="select"
-                  options={[:long, :short]}
-                  prompt="Type"
-                  class="bg-base-300 border-white/5 focus:border-primary/50 text-white"
+                  field={@form[:strategy]}
+                  placeholder="e.g. Break & Retest, Scalp, Swing"
+                  class="w-full bg-base-200/50 border border-white/10 focus:border-primary/50 text-white rounded-lg px-4 py-3 text-sm placeholder:text-white/20 transition-all focus:ring-1 focus:ring-primary/50 focus:outline-none"
                 />
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label class="text-xs text-white/50 uppercase tracking-wider font-medium ml-1">
+                  Notes
+                </label>
                 <.input
-                  field={@form[:entry_price]}
-                  type="number"
-                  step="any"
-                  placeholder="Entry Price"
-                  class="bg-base-300 border-white/5 focus:border-primary/50 text-white"
-                />
-                <.input
-                  field={@form[:size]}
-                  type="number"
-                  step="any"
-                  placeholder="Size (Lots)"
-                  class="bg-base-300 border-white/5 focus:border-primary/50 text-white"
+                  field={@form[:notes]}
+                  type="textarea"
+                  placeholder="Record your mindset and execution details..."
+                  class="w-full bg-base-200/50 border border-white/10 focus:border-primary/50 text-white rounded-lg px-4 py-3 text-sm placeholder:text-white/20 transition-all focus:ring-1 focus:ring-primary/50 focus:outline-none min-h-[100px] resize-none"
                 />
               </div>
 
-              <.input
-                field={@form[:strategy]}
-                placeholder="Strategy (e.g. Break & Retest)"
-                class="bg-base-300 border-white/5 focus:border-primary/50 text-white"
-              />
-              <.input
-                field={@form[:notes]}
-                type="textarea"
-                placeholder="Notes / Observations..."
-                class="bg-base-300 border-white/5 focus:border-primary/50 text-white h-24"
-              />
-
-              <div class="flex justify-end gap-3 mt-6">
-                <button type="button" phx-click="toggle_modal" class="btn btn-ghost text-white/50">
+              <div class="flex justify-end gap-3 pt-4 border-t border-white/5 mt-8">
+                <button
+                  type="button"
+                  phx-click="toggle_modal"
+                  class="px-6 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition-all"
+                >
                   Cancel
                 </button>
-                <button type="submit" class="btn btn-primary">Save Journal Entry</button>
+                <button
+                  type="submit"
+                  class="px-6 py-2 rounded-lg text-sm font-medium bg-primary text-primary-content hover:bg-primary-focus shadow-lg shadow-primary/20 transition-all hover:scale-105"
+                >
+                  Save Journal Entry
+                </button>
               </div>
             </.form>
           </div>
