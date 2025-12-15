@@ -10,7 +10,10 @@ defmodule Tijara.Journal.Entry do
 
   code_interface do
     define :read, action: :read
+    define :get_by_id, action: :read, get_by: [:id]
     define :create, action: :create
+    define :update, action: :update
+    define :destroy, action: :destroy
     define :close_position, action: :close_position
   end
 

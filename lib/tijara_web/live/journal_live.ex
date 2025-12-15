@@ -18,33 +18,67 @@ defmodule TijaraWeb.JournalLive do
       |> assign(:win_rate, 0.68)
       |> assign(:quotes, quotes)
       |> stream(:journal_entries, entries)
-      |> assign(:form, to_form(AshPhoenix.Form.for_create(Tijara.Journal.Entry, :create)))
+      |> assign(
+        :form,
+        to_form(AshPhoenix.Form.for_create(Tijara.Journal.Entry, :create, as: "form"))
+      )
       |> assign(:show_modal, false)
 
     {:ok, socket}
   end
 
-  def handle_event("save", %{"form" => entry_params}, socket) do
-    # TODO: refactor this to match the best practices of AshPhoenix per the Ash Framework Book
-    form = AshPhoenix.Form.for_create(Tijara.Journal.Entry, :create)
+  def handle_event("edit", %{"id" => id}, socket) do
+    entry = Tijara.Journal.Entry.get_by_id!(id)
+    form = AshPhoenix.Form.for_update(entry, :update, as: "form")
 
-    case AshPhoenix.Form.submit(form, params: entry_params) do
+    {:noreply,
+     socket
+     |> assign(:form, to_form(form))
+     |> assign(:show_modal, true)}
+  end
+
+  def handle_event("save", %{"form" => entry_params}, socket) do
+    # Form will auto-detect create vs update based on how it was initialized
+    case AshPhoenix.Form.submit(socket.assigns.form, params: entry_params) do
       {:ok, entry} ->
-        {:noreply,
-         socket
-         # Prepend
-         |> stream_insert(:journal_entries, entry, at: 0)
-         |> assign(:show_modal, false)
-         # Reset form
-         |> assign(:form, to_form(AshPhoenix.Form.for_create(Tijara.Journal.Entry, :create)))
-         |> put_flash(:info, "Trade logged successfully.")}
+        notify_user_msg =
+          if socket.assigns.form.source.action == :create,
+            do: "Trade logged successfully.",
+            else: "Trade updated successfully."
+
+        socket =
+          socket
+          # insert handles updates if ID matches
+          |> stream_insert(:journal_entries, entry)
+          |> assign(:show_modal, false)
+          |> put_flash(:info, notify_user_msg)
+
+        {:noreply, socket}
 
       {:error, form} ->
         {:noreply, assign(socket, :form, to_form(form))}
     end
   end
 
+  def handle_event("delete", %{"id" => id}, socket) do
+    entry = Tijara.Journal.Entry.get_by_id!(id)
+    Tijara.Journal.Entry.destroy!(entry)
+    {:noreply, stream_delete(socket, :journal_entries, entry)}
+  end
+
   def handle_event("toggle_modal", _, socket) do
+    # When opening fresh, ensure we reset to a create form
+    socket =
+      if !socket.assigns.show_modal do
+        assign(
+          socket,
+          :form,
+          to_form(AshPhoenix.Form.for_create(Tijara.Journal.Entry, :create, as: "form"))
+        )
+      else
+        socket
+      end
+
     {:noreply, update(socket, :show_modal, &(!&1))}
   end
 
@@ -167,23 +201,43 @@ defmodule TijaraWeb.JournalLive do
                     <span class="text-sm text-white/80 font-mono">{entry.size} Lots</span>
                   </div>
                 </div>
-                
-    <!-- PNL & Status -->
-                <div class="md:col-span-4 text-right">
-                  <div class={
-                    [
-                      "text-lg font-bold font-mono",
-                      # if(Money.positive?(entry.profit), do: "text-success", else: "text-error") # Need computed field
-                      "text-white/80"
-                    ]
-                  }>
-                    {calculate_pnl(entry)}
+                <!-- PNL & Status & Actions -->
+                <div class="md:col-span-4 flex items-center justify-end gap-4">
+                  <div class="text-right">
+                    <div class={
+                      [
+                        "text-lg font-bold font-mono",
+                        # if(Money.positive?(entry.profit), do: "text-success", else: "text-error") # Need computed field
+                        "text-white/80"
+                      ]
+                    }>
+                      {calculate_pnl(entry)}
+                    </div>
+                    <div class="text-xs text-white/30 uppercase tracking-widest mt-1">
+                      {entry.status}
+                      <%= if entry.status == :open and entry.exit_price do %>
+                        <span class="ml-1 text-[10px] text-primary">(Live)</span>
+                      <% end %>
+                    </div>
                   </div>
-                  <div class="text-xs text-white/30 uppercase tracking-widest mt-1">
-                    {entry.status}
-                    <%= if entry.status == :open and entry.exit_price do %>
-                      <span class="ml-1 text-[10px] text-primary">(Live)</span>
-                    <% end %>
+                  
+    <!-- Actions -->
+                  <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <button
+                      phx-click="edit"
+                      phx-value-id={entry.id}
+                      class="p-2 text-white/40 hover:text-primary transition-colors rounded-lg hover:bg-white/5"
+                    >
+                      <.icon name="hero-pencil-square" class="w-4 h-4" />
+                    </button>
+                    <button
+                      phx-click="delete"
+                      phx-value-id={entry.id}
+                      phx-disable-with="..."
+                      class="p-2 text-white/40 hover:text-error transition-colors rounded-lg hover:bg-white/5"
+                    >
+                      <.icon name="hero-trash" class="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -218,7 +272,8 @@ defmodule TijaraWeb.JournalLive do
             </button>
 
             <h3 class="text-xl font-light uppercase tracking-widest text-white/90 mb-8 flex items-center gap-3">
-              <span class="w-1 h-6 bg-primary rounded-full"></span> Log New Trade
+              <span class="w-1 h-6 bg-primary rounded-full"></span>
+              {if @form.source.action == :create, do: "Log New Trade", else: "Edit Trade"}
             </h3>
 
             <.form for={@form} phx-submit="save" class="space-y-6">
