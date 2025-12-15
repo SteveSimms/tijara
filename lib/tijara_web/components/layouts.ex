@@ -35,40 +35,53 @@ defmodule TijaraWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
+    <div class="min-h-screen bg-base-300 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-800 via-base-300 to-black text-base-content antialiased selection:bg-primary selection:text-white overflow-x-hidden">
+      <!-- Glassmorphic Navbar -->
+      <header class="sticky top-0 z-50 w-full backdrop-blur-md bg-base-300/30 border-b border-white/5">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <a href="/" class="flex items-center gap-2 group">
+              <!-- Animated Logo Placeholder -->
+              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-secondary opacity-80 group-hover:opacity-100 transition-opacity duration-300 blur-[1px]">
+              </div>
+              <span class="text-xl font-light tracking-widest uppercase text-white/90 group-hover:text-white transition-colors">
+                Tijara
+              </span>
             </a>
-          </li>
-        </ul>
-      </div>
-    </header>
+          </div>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block)}
-      </div>
-    </main>
+          <nav class="flex items-center gap-6">
+            <ul class="flex items-center gap-6 text-sm font-medium text-white/60">
+              <li><a href="#" class="hover:text-white transition-colors duration-200">Journal</a></li>
+              <li>
+                <a href="#" class="hover:text-white transition-colors duration-200">Analytics</a>
+              </li>
+              <li>
+                <a href="#" class="hover:text-white transition-colors duration-200">Settings</a>
+              </li>
+            </ul>
+            <div class="h-4 w-px bg-white/10"></div>
+            <.theme_toggle />
+          </nav>
+        </div>
+      </header>
+      
+    <!-- Main Content -->
+      <main class="relative container mx-auto px-4 py-12 sm:px-6 lg:px-8 max-w-7xl animate-fade-in-up">
+        <!-- Geometric Accent - Top Right -->
+        <div class="absolute -top-20 -right-20 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-20 pointer-events-none mix-blend-screen">
+        </div>
+        <!-- Geometric Accent - Bottom Left -->
+        <div class="absolute -bottom-20 -left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl opacity-20 pointer-events-none mix-blend-screen">
+        </div>
 
-    <.flash_group flash={@flash} />
+        <div class="relative z-10 w-full">
+          {render_slot(@inner_block)}
+        </div>
+      </main>
+
+      <.flash_group flash={@flash} />
+    </div>
     """
   end
 
